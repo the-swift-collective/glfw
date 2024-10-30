@@ -359,9 +359,11 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
 
 - (void)dealloc
 {
+#if !__has_feature(objc_arc)
     [trackingArea release];
     [markedText release];
     [super dealloc];
+#endif // !__has_feature(objc_arc)
 }
 
 - (BOOL)isOpaque
@@ -541,7 +543,9 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
     if (trackingArea != nil)
     {
         [self removeTrackingArea:trackingArea];
+#if !__has_feature(objc_arc)
         [trackingArea release];
+#endif // !__has_feature(objc_arc)
     }
 
     const NSTrackingAreaOptions options = NSTrackingMouseEnteredAndExited |
@@ -672,7 +676,9 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
         selectedRange:(NSRange)selectedRange
      replacementRange:(NSRange)replacementRange
 {
+#if !__has_feature(objc_arc)
     [markedText release];
+#endif // !__has_feature(objc_arc)
     if ([string isKindOfClass:[NSAttributedString class]])
         markedText = [[NSMutableAttributedString alloc] initWithAttributedString:string];
     else
@@ -1003,10 +1009,14 @@ void _glfwDestroyWindowCocoa(_GLFWwindow* window)
         window->context.destroy(window);
 
     [window->ns.object setDelegate:nil];
+#if !__has_feature(objc_arc)
     [window->ns.delegate release];
+#endif // !__has_feature(objc_arc)
     window->ns.delegate = nil;
 
+#if !__has_feature(objc_arc)
     [window->ns.view release];
+#endif // !__has_feature(objc_arc)
     window->ns.view = nil;
 
     [window->ns.object close];
@@ -1741,9 +1751,10 @@ GLFWbool _glfwCreateCursorCocoa(_GLFWcursor* cursor,
 
     cursor->ns.object = [[NSCursor alloc] initWithImage:native
                                                 hotSpot:NSMakePoint(xhot, yhot)];
-
+#if !__has_feature(objc_arc)
     [native release];
     [rep release];
+#endif // !__has_feature(objc_arc)
 
     if (cursor->ns.object == nil)
         return GLFW_FALSE;
@@ -1821,7 +1832,10 @@ GLFWbool _glfwCreateStandardCursorCocoa(_GLFWcursor* cursor, int shape)
         return GLFW_FALSE;
     }
 
+#if !__has_feature(objc_arc)
     [cursor->ns.object retain];
+#endif // !__has_feature(objc_arc)
+
     return GLFW_TRUE;
 
     } // autoreleasepool
@@ -1829,10 +1843,12 @@ GLFWbool _glfwCreateStandardCursorCocoa(_GLFWcursor* cursor, int shape)
 
 void _glfwDestroyCursorCocoa(_GLFWcursor* cursor)
 {
+#if !__has_feature(objc_arc)
     @autoreleasepool {
     if (cursor->ns.object)
         [(NSCursor*) cursor->ns.object release];
     } // autoreleasepool
+#endif // !__has_feature(objc_arc)
 }
 
 void _glfwSetCursorCocoa(_GLFWwindow* window, _GLFWcursor* cursor)
@@ -1919,7 +1935,7 @@ EGLNativeDisplayType _glfwGetEGLNativeDisplayCocoa(void)
 
 EGLNativeWindowType _glfwGetEGLNativeWindowCocoa(_GLFWwindow* window)
 {
-    return window->ns.layer;
+    return (__bridge void*)window->ns.layer;
 }
 
 void _glfwGetRequiredInstanceExtensionsCocoa(char** extensions)
@@ -1983,7 +1999,7 @@ VkResult _glfwCreateWindowSurfaceCocoa(VkInstance instance,
 
         memset(&sci, 0, sizeof(sci));
         sci.sType = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT;
-        sci.pLayer = window->ns.layer;
+        sci.pLayer = (__bridge void*)window->ns.layer;
 
         err = vkCreateMetalSurfaceEXT(instance, &sci, allocator, surface);
     }
@@ -2003,7 +2019,7 @@ VkResult _glfwCreateWindowSurfaceCocoa(VkInstance instance,
 
         memset(&sci, 0, sizeof(sci));
         sci.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
-        sci.pView = window->ns.view;
+        sci.pView = (__bridge void*)window->ns.view;
 
         err = vkCreateMacOSSurfaceMVK(instance, &sci, allocator, surface);
     }

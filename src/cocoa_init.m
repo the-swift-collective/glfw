@@ -125,7 +125,9 @@ static void createMenuBar(void)
     [[appMenu addItemWithTitle:@"Services"
                        action:NULL
                 keyEquivalent:@""] setSubmenu:servicesMenu];
+#if !__has_feature(objc_arc)
     [servicesMenu release];
+#endif // !__has_feature(objc_arc)
     [appMenu addItem:[NSMenuItem separatorItem]];
     [appMenu addItemWithTitle:[NSString stringWithFormat:@"Hide %@", appName]
                        action:@selector(hide:)
@@ -144,7 +146,9 @@ static void createMenuBar(void)
 
     NSMenuItem* windowMenuItem =
         [bar addItemWithTitle:@"" action:NULL keyEquivalent:@""];
+#if !__has_feature(objc_arc)
     [bar release];
+#endif // !__has_feature(objc_arc)
     NSMenu* windowMenu = [[NSMenu alloc] initWithTitle:@"Window"];
     [NSApp setWindowsMenu:windowMenu];
     [windowMenuItem setSubmenu:windowMenu];
@@ -323,7 +327,7 @@ static GLFWbool updateUnicodeData(void)
     }
 
     _glfw.ns.unicodeData =
-        TISGetInputSourceProperty(_glfw.ns.inputSource,
+        (__bridge id)TISGetInputSourceProperty(_glfw.ns.inputSource,
                                   kTISPropertyUnicodeKeyLayoutData);
     if (!_glfw.ns.unicodeData)
     {
@@ -427,9 +431,10 @@ static GLFWbool initializeTIS(void)
 
         if ([[NSBundle mainBundle] pathForResource:@"MainMenu" ofType:@"nib"])
         {
+            __strong id *nibObjects = &_glfw.ns.nibObjects;
             [[NSBundle mainBundle] loadNibNamed:@"MainMenu"
                                           owner:NSApp
-                                topLevelObjects:&_glfw.ns.nibObjects];
+                                topLevelObjects:(__strong id*)&nibObjects];
         }
         else
             createMenuBar();
@@ -663,7 +668,9 @@ void _glfwTerminateCocoa(void)
     if (_glfw.ns.delegate)
     {
         [NSApp setDelegate:nil];
+#if !__has_feature(objc_arc)
         [_glfw.ns.delegate release];
+#endif // !__has_feature(objc_arc)
         _glfw.ns.delegate = nil;
     }
 
@@ -675,7 +682,9 @@ void _glfwTerminateCocoa(void)
                     object:nil];
         [[NSNotificationCenter defaultCenter]
             removeObserver:_glfw.ns.helper];
+#if !__has_feature(objc_arc)
         [_glfw.ns.helper release];
+#endif // !__has_feature(objc_arc)
         _glfw.ns.helper = nil;
     }
 

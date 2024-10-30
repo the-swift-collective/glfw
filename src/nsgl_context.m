@@ -114,10 +114,14 @@ static void destroyContextNSGL(_GLFWwindow* window)
 {
     @autoreleasepool {
 
+#if !__has_feature(objc_arc)
     [window->context.nsgl.pixelFormat release];
+#endif // !__has_feature(objc_arc)
     window->context.nsgl.pixelFormat = nil;
 
+#if !__has_feature(objc_arc)
     [window->context.nsgl.object release];
+#endif // !__has_feature(objc_arc)
     window->context.nsgl.object = nil;
 
     } // autoreleasepool
